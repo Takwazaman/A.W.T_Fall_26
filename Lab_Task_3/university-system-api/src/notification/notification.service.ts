@@ -1,0 +1,47 @@
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { CourseService } from '../course/course.service.js';
+
+@Injectable()
+export class NotificationService {
+  sendNotification(studentName: string, message: string) {
+    return {
+      student: studentName,
+      message,
+      sentAt: new Date().toISOString()
+    };
+  }
+}
+
+@Injectable()
+export class EnrollmentService {
+  constructor(
+    private courseService: CourseService,
+
+    @Inject(forwardRef(() => NotificationService))
+    private notificationService: NotificationService
+  ) {}
+
+  getEnrollments() {
+    return {
+      message: 'All enrollments fetched',
+      data: []
+    };
+  }
+
+  enrollStudent(studentName: string, courseId: string) {
+    const course = this.courseService.getCourseById(courseId);
+
+    const notification = this.notificationService.sendNotification(
+      studentName,
+      'Welcome!'
+    );
+
+    return {
+      message: 'Student enrolled successfully',
+      student: studentName,
+      course,
+      notification
+    };
+  }
+}
+
